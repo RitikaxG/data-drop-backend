@@ -1,0 +1,88 @@
+# ------------------------------
+# OS-generated files
+# ------------------------------
+.DS_Store
+Thumbs.db
+
+# ------------------------------
+# Log and temporary files
+# ------------------------------
+*.log
+*.tmp
+*.swp
+*.bak
+*.pid
+
+# ------------------------------
+# Dependency directories
+# ------------------------------
+node_modules/
+venv/
+.env
+.env.*
+
+# ------------------------------
+# Python build artifacts
+# ------------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg
+*.egg-info/
+dist/
+build/
+*.manifest
+*.spec
+
+# ------------------------------
+# IDE and Editor specific
+# ------------------------------
+.vscode/
+.idea/
+*.code-workspace
+
+# ------------------------------
+# Jupyter Notebook checkpoints
+# ------------------------------
+.ipynb_checkpoints/
+
+# ------------------------------
+# System files and backups
+# ------------------------------
+*.DS_Store
+*.Thumbs.db
+*.bak
+*.orig
+
+# ------------------------------
+# Compiled source
+# ------------------------------
+*.class
+*.o
+*.out
+*.so
+
+# ------------------------------
+# Logs and coverage reports
+# ------------------------------
+coverage/
+*.cover
+*.lcov
+*.lcov.info
+.nyc_output/
+
+# ------------------------------
+# Test cache
+# ------------------------------
+pytest_cache/
+.cache/
+
+# ------------------------------
+# Secrets (ensure not committed)
+# ------------------------------
+*.pem
+*.key
+*.crt
+*.p12
+*.jks
+*.pfx
