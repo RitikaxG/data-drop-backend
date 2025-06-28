@@ -1,67 +1,55 @@
-import { getSubtitles } from "youtube-captions-scraper";
-import { HindiToEnglish } from "../services/mistralai";
+import TranscriptAPI from "youtube-transcript-api";
+
+// Type for each transcript segment
+type TranscriptResponse = {
+  text: string;
+  duration: number;
+  offset: number;
+};
 
 // Extracts text from a YouTube video.
+export const extractTextFromYouTube = async (youtubeUrl: string): Promise<string> => {
+  try {
+    const videoId = extractYouTubeVideoId(youtubeUrl);
+    if (!videoId) throw new Error("Invalid YouTube URL");
 
-export const extractTextFromYouTube = async (youtubeUrl: string) : Promise<string> => {
-
-    try {
-        // Fetch captions
-        const captions = await extractCaptionsFromYouTube(youtubeUrl);
-        if (captions) {
-            console.log(`Returning extracted captions ${captions}`);
-            return captions;
-        }
-    } 
-    catch (error) {
-        console.error(" Error processing YouTube URL:", error);
-        return ""; // Return empty text instead of crashing
+    const captions = await extractCaptionsFromYouTube(videoId);
+    if (captions.length > 0) {
+      const fullText = captions.map((item) => item.text).join(" ");
+      console.log(`Returning extracted captions: ${fullText}`);
+      return fullText;
     }
-    return "";
+  } catch (error) {
+    console.error("Error processing YouTube URL:", error);
+    return ""; // Return empty text instead of crashing
+  }
+
+  return "";
 };
 
+// Extract captions from YouTube using youtube-transcript-api
+const extractCaptionsFromYouTube = async (
+  videoId: string
+): Promise<TranscriptResponse[]> => {
+  const result = (await TranscriptAPI.getTranscript(videoId)) as {
+    start: string;
+    text: string;
+    duration: string;
+  }[];
 
-// Extracts captions from YouTube 
+  const transcript: TranscriptResponse[] = result.map((r) => ({
+    text: r.text,
+    duration: Number(r.duration),
+    offset: Number(r.start),
+  }));
 
-const extractCaptionsFromYouTube = async (youtubeUrl: string): Promise<string> => {
-    try {
-        const videoId = extractYouTubeVideoId(youtubeUrl);
-        if (!videoId) throw new Error("Invalid YouTube URL");
-
-        let captions;
-        try{
-            captions = await getSubtitles({ videoID: videoId, lang: "en" });
-        }
-        catch(err){
-            console.error("English captions not available trying Hindi captions..");
-            captions = await getSubtitles({ videoID : videoId, lang : "hi"});
-            console.log(captions);
-        }
-
-        if(captions){
-            captions = captions.map((caption) => caption.text).join(" ");
-            console.log(captions);
-            // Add a prompt to convert Hindi captions to English 
-            captions = await HindiToEnglish(captions);
-            console.log(captions);
-            return captions;
-        }
-        else{
-            return "";
-        }
-
-    } catch (error) {
-        console.warn("⚠️ Could not extract captions:", error);
-        return "";
-    }
+  return transcript;
 };
-
 
 // Extracts YouTube video ID from a URL.
-
-const extractYouTubeVideoId = (url: string): string  => {
-    const match = url.match(/(?:youtube\.com\/.*v=|youtu\.be\/)([^&]+)/);
-    return match ? match[1] : "";
+const extractYouTubeVideoId = (url: string): string => {
+  const match = url.match(/(?:youtu\.be\/|v=)([A-Za-z0-9_-]{11})/);
+  return match ? match[1] : "";
 };
 
 

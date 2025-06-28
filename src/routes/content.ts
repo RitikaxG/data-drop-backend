@@ -18,6 +18,7 @@ contentRouter.post('/content', adminAuth,  async(req : Request ,res : Response) 
     const { type, link } = req.body;
 
     const text           = await extractContentFromLink(link);
+    console.log(text);
     const summarizedText = await summarizeChat(text);
     const title          = await assignTitle(summarizedText);
     const tags           = await generateTags(summarizedText);
@@ -79,7 +80,10 @@ contentRouter.post('/content', adminAuth,  async(req : Request ,res : Response) 
             summary : summarizedText
         })
 
-        const embedding = await hfEmbedding(newContent.link);
+        console.log(newContent);
+
+        const embedding = await hfEmbedding(newContent.summary!);
+        console.log(embedding);
 
         const record    = {
             id : newContent._id.toString(),
@@ -103,6 +107,7 @@ contentRouter.post('/content', adminAuth,  async(req : Request ,res : Response) 
 
     catch(err){
         if(err instanceof Error){
+            console.error(err);
             res.status(500).send(`Error adding content ${err.message}`);
             return;
         }
@@ -193,6 +198,7 @@ contentRouter.post('/content/search', adminAuth, async(req : Request, res : Resp
     }
 })
 
+// Search via type of content
 contentRouter.post('/content/type', async (req : Request, res : Response) => {
     const { type } = req.body;
     try{

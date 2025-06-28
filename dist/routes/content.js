@@ -29,6 +29,7 @@ exports.contentRouter = (0, express_1.Router)();
 exports.contentRouter.post('/content', admin_1.adminAuth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { type, link } = req.body;
     const text = yield (0, embedContent_1.extractContentFromLink)(link);
+    console.log(text);
     const summarizedText = yield (0, mistralai_1.summarizeChat)(text);
     const title = yield (0, mistralai_1.assignTitle)(summarizedText);
     const tags = yield (0, cohereai_1.generateTags)(summarizedText);
@@ -78,7 +79,9 @@ exports.contentRouter.post('/content', admin_1.adminAuth, (req, res) => __awaite
             userId: req.userId,
             summary: summarizedText
         });
-        const embedding = yield (0, huggingface_1.hfEmbedding)(newContent.link);
+        console.log(newContent);
+        const embedding = yield (0, huggingface_1.hfEmbedding)(newContent.summary);
+        console.log(embedding);
         const record = {
             id: newContent._id.toString(),
             values: (0, embeddings_1.formatEmbedding)(embedding),
@@ -98,6 +101,7 @@ exports.contentRouter.post('/content', admin_1.adminAuth, (req, res) => __awaite
     }
     catch (err) {
         if (err instanceof Error) {
+            console.error(err);
             res.status(500).send(`Error adding content ${err.message}`);
             return;
         }
@@ -176,6 +180,7 @@ exports.contentRouter.post('/content/search', admin_1.adminAuth, (req, res) => _
         return;
     }
 }));
+// Search via type of content
 exports.contentRouter.post('/content/type', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { type } = req.body;
     try {

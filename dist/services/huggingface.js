@@ -19,7 +19,7 @@ dotenv_1.default.config();
 const hf = new inference_1.HfInference(process.env.HF_TOKEN);
 const hfEmbedding = (input) => __awaiter(void 0, void 0, void 0, function* () {
     const output = yield hf.featureExtraction({
-        model: "intfloat/e5-small-v2",
+        model: "sentence-transformers/all-MiniLM-L6-v2",
         inputs: input
     });
     return output;

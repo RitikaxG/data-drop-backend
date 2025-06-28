@@ -85,9 +85,9 @@ embeddingRouter.post('/getQuery' ,adminAuth, async ( req : Request, res : Respon
         // 2. Convert Query to Embeddings
         const queryEmbedding     = await hfEmbedding(query);
         const formattedEmbedding = formatEmbedding(queryEmbedding);
+        
 
         // 3. Search in Pinecone ( Retreive top 5 matches )
-        
         const results = await index.query({
             vector : formattedEmbedding,
             topK   : 5,
@@ -148,3 +148,4 @@ embeddingRouter.get('/tags', async (req : Request, res : Response) => {
         res.status(500).send(`Error generating tags ${err}`);
     }
 })
+

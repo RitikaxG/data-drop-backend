@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "typeRoots": ["./types", "./node_modules/@types","./node_modules/long"],
     /* Visit https://aka.ms/tsconfig to read more about this file */
 
     /* Projects */

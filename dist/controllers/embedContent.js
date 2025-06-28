@@ -1,37 +1,4 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -48,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.extractContentFromLink = exports.extractTextFromLinks = exports.extractTextFromPdf = void 0;
 const pdf_parse_1 = __importDefault(require("pdf-parse"));
 const axios_1 = __importDefault(require("axios"));
-const cheerio = __importStar(require("cheerio"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const imageFile_1 = require("./imageFile");
 const googleDocx_1 = require("./googleDocx");
@@ -71,30 +37,37 @@ const extractTextFromPdf = (pdfUrl) => __awaiter(void 0, void 0, void 0, functio
 exports.extractTextFromPdf = extractTextFromPdf;
 // Scrape content from weblink Blob/ Article
 // Axios returns the HTML webpage by default as string
+const jsdom_1 = require("jsdom");
 const extractTextFromLinks = (url) => __awaiter(void 0, void 0, void 0, function* () {
     const response = yield axios_1.default.get(url);
-    const $ = cheerio.load(response.data); // Loads HTML
+    const dom = new jsdom_1.JSDOM(response.data);
+    const document = dom.window.document;
     // Remove unwanted elements
-    $("script, style, noscript, iframe, header, footer, nav, aside").remove();
+    const unwantedSelectors = ['script', 'style', 'noscript', 'iframe', 'header', 'footer', 'nav', 'aside'];
+    unwantedSelectors.forEach(selector => {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach(el => el.remove());
+    });
     const seen = new Set();
     // Extract text from multiple relevant tags and clean it
-    const extractedText = $("p, h1, h2, h3, h4, h5, h6, li")
-        .map((_, el) => $(el).text().replace(/\s+/g, " ").trim())
-        .get()
-        .filter(text => {
-        var _a;
+    const relevantElements = document.querySelectorAll('p, h1, h2, h3, h4, h5, h6, li');
+    const extractedTexts = [];
+    relevantElements.forEach(el => {
+        var _a, _b;
+        const text = ((_a = el.textContent) === null || _a === void 0 ? void 0 : _a.replace(/\s+/g, " ").trim()) || "";
+        // Apply the same filtering logic
         if (text.length < 3)
-            return false; // Remove short junk text
-        if (((_a = text.match(/[^a-zA-Z0-9\s.,'!?-]/g)) !== null && _a !== void 0 ? _a : []).length > text.length * 0.3)
-            return false;
+            return; // Remove short junk text
+        if (((_b = text.match(/[^a-zA-Z0-9\s.,'!?-]/g)) !== null && _b !== void 0 ? _b : []).length > text.length * 0.3)
+            return;
         if (text.includes("fill:") || text.includes("{") || text.includes("}"))
-            return false; // Remove CSS junk
+            return; // Remove CSS junk
         if (seen.has(text))
-            return false; // Remove duplicates
+            return; // Remove duplicates
         seen.add(text);
-        return true;
-    })
-        .join("\n\n");
+        extractedTexts.push(text);
+    });
+    const extractedText = extractedTexts.join("\n\n");
     console.log(extractedText);
     return extractedText;
 });
@@ -129,6 +102,7 @@ const extractContentFromLink = (link) => __awaiter(void 0, void 0, void 0, funct
         }
         else if (mimeType.includes("text/html")) {
             if (link.includes("youtube") || link.includes("youtu.be")) {
+                console.log("Redirecting to extract text from video url");
                 return yield (0, video_1.extractTextFromYouTube)(link);
             }
             else if (link.includes("docs")) {
