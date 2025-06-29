@@ -95,6 +95,7 @@ contentRouter.post('/content', adminAuth,  async(req : Request ,res : Response) 
                 tags    : newContent.tags,
             }
         }
+        console.log(record);
 
         await index.upsert([record]);
 
