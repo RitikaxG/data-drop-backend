@@ -79,7 +79,7 @@ brainRouter.get('/:shareLink' , async( req : Request, res : Response) => {
         const sharedContent = await ContentModel.find({
             userId : sharedLink.userId
         }).populate("userId", "firstname lastname");
-        
+        console.log(sharedContent);
 
         if(!sharedContent){
             res.status(400).send("ShareLink is invalid");

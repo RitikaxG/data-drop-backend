@@ -18,6 +18,8 @@
     "@huggingface/inference": "^3.6.2",
     "@mistralai/mistralai": "^1.5.2",
     "@pinecone-database/pinecone": "^5.1.1",
+    "@tabler/icons-react": "^3.34.0",
+    "@types/long": "^5.0.0",
     "axios": "^1.10.0",
     "bcrypt": "^5.1.1",
     "cheerio": "1.0.0-rc.12",

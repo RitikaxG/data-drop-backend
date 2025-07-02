@@ -98,7 +98,7 @@ contentRouter.post('/content', adminAuth,  async(req : Request ,res : Response) 
         console.log(record);
 
         await index.upsert([record]);
-
+        console.log("Data upserted");
         res.status(200).json({
             message : "Content successsfully added and upserted",
             content : newContent
